@@ -1,0 +1,15 @@
+server:
+  port: ${PORT:8083}
+
+spring:
+  application:
+    name: api-3-todo-service
+
+jsonplaceholder:
+  todos-url: ${JSONPLACEHOLDER_TODOS_URL:https://jsonplaceholder.typicode.com/todos}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

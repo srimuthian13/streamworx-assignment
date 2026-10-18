@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.streamworx</groupId>
+    <artifactId>streamworx-assignment</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>Streamworx Microservices Assignment</name>
+    <description>Root POM for Streamworx Microservices Assignment</description>
+
+    <modules>
+        <module>api-gateway</module>
+        <module>api-1-user-service</module>
+        <module>api-2-post-service</module>
+        <module>api-3-todo-service</module>
+    </modules>
+</project>

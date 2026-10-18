@@ -1,0 +1,26 @@
+server:
+  port: ${PORT:8081}
+
+spring:
+  application:
+    name: api-1-user-service
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 5000ms
+
+jsonplaceholder:
+  users-url: ${JSONPLACEHOLDER_USERS_URL:https://jsonplaceholder.typicode.com/users}
+
+services:
+  todo:
+    url: ${SERVICES_TODO_URL:https://jsonplaceholder.typicode.com}
+  post:
+    url: ${SERVICES_POST_URL:http://localhost:8082}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

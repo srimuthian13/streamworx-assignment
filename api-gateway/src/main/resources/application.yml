@@ -1,0 +1,47 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: api-1-user-service
+          uri: ${USER_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/v1/users, /api/v1/users/**
+          filters:
+            - StripPrefix=2
+
+        - id: api-2-post-service
+          uri: ${POST_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/v2/posts, /api/v2/posts/**
+          filters:
+            - StripPrefix=2
+
+        - id: api-3-todo-service
+          uri: ${TODO_SERVICE_URL:https://jsonplaceholder.typicode.com}
+          predicates:
+            - Path=/api/v3/todos, /api/v3/todos/**
+          filters:
+            - StripPrefix=2
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

@@ -1,0 +1,136 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: posts_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d posts_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      microservices-net:
+        aliases:
+          - postgres-db
+
+  redis-cache:
+    image: redis:7-alpine
+    container_name: redis-cache
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      microservices-net:
+        aliases:
+          - redis-cache
+
+  api-3-todo-service:
+    build:
+      context: ./api-3-todo-service
+      dockerfile: Dockerfile
+    container_name: api-3-todo-service
+    restart: on-failure
+    ports:
+      - "8083:8083"
+    environment:
+      - PORT=8083
+    networks:
+      microservices-net:
+        aliases:
+          - api-3-todo-service
+          - api-3-service
+
+  api-2-post-service:
+    build:
+      context: ./api-2-post-service
+      dockerfile: Dockerfile
+    container_name: api-2-post-service
+    restart: on-failure
+    ports:
+      - "8082:8082"
+    environment:
+      - PORT=8082
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres-db:5432/posts_db
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      microservices-net:
+        aliases:
+          - api-2-post-service
+          - api-2-service
+
+  api-1-user-service:
+    build:
+      context: ./api-1-user-service
+      dockerfile: Dockerfile
+    container_name: api-1-user-service
+    restart: on-failure
+    ports:
+      - "8081:8081"
+    environment:
+      - PORT=8081
+      - SPRING_DATA_REDIS_HOST=redis-cache
+      - SPRING_DATA_REDIS_PORT=6379
+      - SERVICES_TODO_URL=http://api-3-todo-service:8083
+      - SERVICES_POST_URL=http://api-2-post-service:8082
+    depends_on:
+      redis-cache:
+        condition: service_healthy
+      api-2-post-service:
+        condition: service_started
+      api-3-todo-service:
+        condition: service_started
+    networks:
+      microservices-net:
+        aliases:
+          - api-1-user-service
+          - api-1-service
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    restart: on-failure
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - USER_SERVICE_URL=http://api-1-user-service:8081
+      - POST_SERVICE_URL=http://api-2-post-service:8082
+      - TODO_SERVICE_URL=http://api-3-todo-service:8083
+    depends_on:
+      - api-1-user-service
+      - api-2-post-service
+      - api-3-todo-service
+    networks:
+      microservices-net:
+        aliases:
+          - api-gateway
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  microservices-net:
+    driver: bridge
