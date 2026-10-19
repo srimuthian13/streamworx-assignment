@@ -10,7 +10,7 @@ Sistem ini terdiri dari 6 komponen (5 services + 1 API Gateway) yang saling beri
 
 ```mermaid
 flowchart TD
-    Client(["Client / Browser / Postman"]) -->|HTTP Request| Gateway["API Gateway (Port 8080)<br/>Spring Cloud Gateway"]
+    Client(["Client / cURL / Browser"]) -->|HTTP Request| Gateway["API Gateway (Port 8080)<br/>Spring Cloud Gateway"]
     
     subgraph Routing ["Routing Rules"]
         Gateway -->|/api/v1/users/**| API1["API 1: User Service (Port 8081)"]
@@ -20,10 +20,10 @@ flowchart TD
 
     subgraph Internal_Interactions ["Data & Service Integration"]
         API1 -->|"1. Baca Cache User"| Redis[("Redis Cache (Port 6379)<br/>Users Cache")]
-        API1 -->|"2. HTTP GET /todos?userId={id}"| API3
-        API1 -->|"3. HTTP GET /posts?userId={id} (XML)"| API2
+        API1 -->|"2. HTTP GET /todos?userId=:id"| API3
+        API1 -->|"3. HTTP GET /posts?userId=:id (XML)"| API2
         
-        API2 -->|Simpan & Baca Posts| Postgres[("PostgreSQL (Port 5432)<br/>DB: posts_db")]
+        API2 -->|"Simpan & Baca Posts"| Postgres[("PostgreSQL (Port 5432)<br/>DB: posts_db")]
     end
 
     subgraph External_Sources ["External Data Sources (JSONPlaceholder)"]
@@ -55,8 +55,13 @@ streamworx-assignment/
 ├── pom.xml                               # Root Maven POM (Aggregator multi-module)
 ├── docker-compose.yml                    # Konfigurasi orkestrasi seluruh container
 ├── README.md                             # Dokumentasi project
+├── run.bat                               # Script build & running otomatis (Windows)
+├── run.sh                                # Script build & running otomatis (Linux/macOS)
 ├── .gitignore
 ├── .dockerignore
+│
+├── init-db/                              # Inisialisasi Database PostgreSQL
+│   └── init.sql                          # SQL dump schema & initial posts data
 │
 ├── api-gateway/                          # API Gateway (Spring Cloud Gateway)
 │   ├── pom.xml
@@ -175,9 +180,6 @@ docker compose down
 ---
 
 ## 🔍 Daftar Endpoint & Pengujian (API Testing)
-
-> [!TIP]
-> **Postman Collection Siap Pakai:** File collection [Streamworx_Microservices.postman_collection.json](Streamworx_Microservices.postman_collection.json) sudah tersedia di root project. Anda cukup mengklik **Import** di Postman dan memilih file tersebut untuk langsung mengetes semua skenario request.
 
 Semua request dapat diarahkan melalui **API Gateway (`http://localhost:8080`)**:
 
