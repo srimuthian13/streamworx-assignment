@@ -19,9 +19,9 @@ flowchart TD
     end
 
     subgraph Internal_Interactions ["Data & Service Integration"]
-        API1 -->|1. Baca Cache User| Redis[("Redis Cache (Port 6379)<br/>Users Cache")]
-        API1 -->|2. HTTP GET /todos?userId={id}| API3
-        API1 -->|3. HTTP GET /posts?userId={id} (XML)| API2
+        API1 -->|"1. Baca Cache User"| Redis[("Redis Cache (Port 6379)<br/>Users Cache")]
+        API1 -->|"2. HTTP GET /todos?userId={id}"| API3
+        API1 -->|"3. HTTP GET /posts?userId={id} (XML)"| API2
         
         API2 -->|Simpan & Baca Posts| Postgres[("PostgreSQL (Port 5432)<br/>DB: posts_db")]
     end
